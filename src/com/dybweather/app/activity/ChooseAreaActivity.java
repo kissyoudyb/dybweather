@@ -5,8 +5,12 @@ import java.util.List;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -25,6 +29,8 @@ import com.dybweather.app.util.HttpUtil;
 import com.dybweather.app.util.Utility;
 
 public class ChooseAreaActivity extends Activity {
+	
+	public static final String TAG = "ChooseAreaActivity";
 
 	public static final int LEVEL_PROVINCE = 0;
 	
@@ -44,9 +50,22 @@ public class ChooseAreaActivity extends Activity {
 	
 	private int currentLevel;
 	
+	private boolean isFromWeatherActivity;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		isFromWeatherActivity = getIntent().getBooleanExtra("from_weather_activity", false);
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		
+		//已经选择了城市且不是从WeatherActivity跳转过来，才会直接跳转到WeatherActivity
+		if(prefs.getBoolean("city_selected", false) && !isFromWeatherActivity){
+			Intent intent = new Intent(this, WeatherActivity.class);
+			startActivity(intent);
+			finish();
+			return;
+		}
+		
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.choose_area);
 		listView = (ListView) findViewById(R.id.list_view);
@@ -62,11 +81,18 @@ public class ChooseAreaActivity extends Activity {
 					long arg3) {
 				if(currentLevel == LEVEL_PROVINCE){
 					selectedProvince = provinceList.get(index);
-					Toast.makeText(ChooseAreaActivity.this, "你点击了:" + selectedProvince.getProvinceName() + ", 编码为: " + selectedProvince.getProvinceCode(), Toast.LENGTH_SHORT).show();
+					//Toast.makeText(ChooseAreaActivity.this, "你点击了:" + selectedProvince.getProvinceName() + ", 编码为: " + selectedProvince.getProvinceCode(), Toast.LENGTH_SHORT).show();
 					queryCities();
 				} else if(currentLevel == LEVEL_CITY){
 					selectedCity = cityList.get(index);
-					Toast.makeText(ChooseAreaActivity.this, "您选择的城市名为: " + selectedCity.getCityName() + ", 城市代码为: " + selectedCity.getCityCode(), Toast.LENGTH_SHORT).show();
+					String cityCode = selectedCity.getCityCode();
+					String cityName = selectedCity.getCityName();
+					//Toast.makeText(ChooseAreaActivity.this, "您选择的城市名为: " + cityName + ", 城市代码为: " + cityCode, Toast.LENGTH_SHORT).show();
+					Intent intent = new Intent(ChooseAreaActivity.this, WeatherActivity.class);
+					intent.putExtra("city_code", cityCode);
+					startActivity(intent);
+					finish();
+					
 				}
 			}
 			
@@ -92,7 +118,7 @@ public class ChooseAreaActivity extends Activity {
 	
 	private void queryCities(){
 		cityList = dybWeatherDB.loadCities(selectedProvince.getProvinceCode());
-		Toast.makeText(ChooseAreaActivity.this, "cityList.length(): " + cityList.size(), Toast.LENGTH_SHORT).show();
+		//Toast.makeText(ChooseAreaActivity.this, "cityList.length(): " + cityList.size(), Toast.LENGTH_SHORT).show();
 		if(cityList.size() > 0){
 			dataList.clear();
 			for(City city : cityList){
@@ -184,9 +210,14 @@ public class ChooseAreaActivity extends Activity {
 	
 	@Override
 	public void onBackPressed() {
+		Log.d(TAG, "currentLevel==========>:" + currentLevel);
 		if(currentLevel == LEVEL_CITY){
 			queryProvinces();
 		} else {
+			if(isFromWeatherActivity){
+				Intent intent = new Intent(this, WeatherActivity.class);
+				startActivity(intent);
+			}
 			finish();
 		}
 	}
