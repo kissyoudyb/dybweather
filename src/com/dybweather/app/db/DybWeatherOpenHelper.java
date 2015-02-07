@@ -16,7 +16,7 @@ public class DybWeatherOpenHelper extends SQLiteOpenHelper {
 			+ "id integer primary key autoincrement, "
 			+ "city_name text, "
 			+ "city_code text, "
-			+ "province_id integer)";
+			+ "province_id text)";
 
 	public DybWeatherOpenHelper(Context context, String name,
 			CursorFactory factory, int version) {

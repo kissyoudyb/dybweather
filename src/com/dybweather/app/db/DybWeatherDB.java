@@ -53,7 +53,7 @@ public class DybWeatherDB {
 		}
 	}
 	
-	public List<Province> loadProvince(){
+	public List<Province> loadProvinces(){
 		List<Province> list = new ArrayList<Province>();
 		Cursor cursor = db.query("Province", null, null, null, null, null, null);
 		if(cursor.moveToFirst()){
@@ -68,9 +68,9 @@ public class DybWeatherDB {
 		return list;
 	}
 	
-	public List<City> loadCities(int provinceId){
+	public List<City> loadCities(String provinceId){
 		List<City> list = new ArrayList<City>();
-		Cursor cursor = db.query("City", null, "province_id = ?", new String[]{String.valueOf(provinceId)}, null, null, null);
+		Cursor cursor = db.query("City", null, "province_id = ?", new String[]{provinceId}, null, null, null);
 		if(cursor.moveToFirst()){
 			do{
 				City city = new City();
@@ -82,5 +82,5 @@ public class DybWeatherDB {
 			} while(cursor.moveToNext());
 		}
 		return list;
-;	}
+	}
 }
