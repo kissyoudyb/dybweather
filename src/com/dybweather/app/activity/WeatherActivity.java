@@ -1,6 +1,7 @@
 package com.dybweather.app.activity;
 
 import com.dybweather.app.R;
+import com.dybweather.app.service.AutoUpdateService;
 import com.dybweather.app.util.HttpCallbackListener;
 import com.dybweather.app.util.HttpUtil;
 import com.dybweather.app.util.Utility;
@@ -144,6 +145,8 @@ public class WeatherActivity extends Activity implements OnClickListener {
 		weatherInfoLayout.setVisibility(View.VISIBLE);
 		cityNameText.setVisibility(View.VISIBLE);
 		
+		Intent intent = new Intent(this, AutoUpdateService.class);
+		startService(intent);
 	}
 
 }
